@@ -21,12 +21,28 @@ manifests/
 Before using, replace the following placeholders:
 
 | Placeholder | Replace With | Files |
-|-------------|--------------|-------|
+|-------------|--------------|--------|
 | `OWNER` | Your GitHub username | `backend/deployment.yaml`, `argocd/*.yaml` |
-| `IMAGE_TAG` | `latest` (initially) | `backend/deployment.yaml` |
-| `DOMAIN_NAME` | Your domain | `backend/ingress.yaml` |
 
-### 2. Create Sealed Secrets
+**Done for ryokushaka/kabu-agent-gitops**
+
+### 2. Access Without Domain
+
+Since no domain is configured, access services via NodePort:
+
+```bash
+# Get NodePort for backend
+kubectl -n kabu-agent get svc kabu-backend
+
+# Access via Elastic IP:NodePort
+# Example: http://106.73.5.224:30080
+```
+
+Services:
+- **Backend**: `EIP:30080`
+- **ArgoCD**: `https://EIP:30443` (use ArgoCD password from EC2)
+
+### 3. Create Sealed Secrets (After K3s deployed)
 
 ```bash
 # On your K3s server (where sealed-secrets controller runs)
@@ -47,7 +63,7 @@ git commit -m "chore: add sealed secrets"
 git push
 ```
 
-### 3. Register with ArgoCD
+### 4. Register with ArgoCD
 
 ```bash
 # Apply ArgoCD application
@@ -88,4 +104,22 @@ argocd app sync kabu-agent
 kubectl -n argocd patch application kabu-agent \
   --type merge \
   -p '{"operation": {"initiatedBy": {"username": "admin"}, "sync": {}}}'
+```
+
+## Troubleshooting
+
+### Backend Not Accessible
+
+Check NodePort:
+```bash
+kubectl -n kabu-agent get svc kabu-backend
+# Look for port in 30000-32767 range under PORT(S)
+```
+
+### ArgoCD Password
+
+```bash
+# Get from EC2 server
+ssh ubuntu@EIP
+cat /home/ubuntu/argocd-password.txt
 ```
