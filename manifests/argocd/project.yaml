@@ -7,7 +7,7 @@ spec:
   description: Kabu Agent Project
 
   sourceRepos:
-    - 'https://github.com/OWNER/kabu-agent-gitops.git'
+    - 'https://github.com/ryokushaka/kabu-agent-gitops.git'
 
   destinations:
     - namespace: kabu-agent

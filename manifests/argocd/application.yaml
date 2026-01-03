@@ -9,7 +9,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/OWNER/kabu-agent-gitops.git
+    repoURL: https://github.com/ryokushaka/kabu-agent-gitops.git
     targetRevision: main
     path: manifests/kabu-agent
 
