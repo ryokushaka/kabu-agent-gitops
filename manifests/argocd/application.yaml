@@ -12,6 +12,8 @@ spec:
     repoURL: https://github.com/ryokushaka/kabu-agent-gitops.git
     targetRevision: main
     path: manifests/kabu-agent
+    directory:
+      recurse: true
 
   destination:
     server: https://kubernetes.default.svc
