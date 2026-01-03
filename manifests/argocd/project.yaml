@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kabu-agent
+  namespace: argocd
+spec:
+  description: Kabu Agent Project
+
+  sourceRepos:
+    - 'https://github.com/OWNER/kabu-agent-gitops.git'
+
+  destinations:
+    - namespace: kabu-agent
+      server: https://kubernetes.default.svc
+    - namespace: monitoring
+      server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kabu-backend
+  namespace: kabu-agent
+  labels:
+    app: kabu-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kabu-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: kabu-backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: backend
+          image: ghcr.io/OWNER/kabu-agent-backend:IMAGE_TAG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kabu-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kabu-secrets
+                  key: redis-url
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kabu-secrets
+                  key: gemini-api-key
+            - name: KIS_APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kabu-secrets
+                  key: kis-app-key
+            - name: KIS_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kabu-secrets
+                  key: kis-app-secret
+            - name: KIS_ACCOUNT_NUMBER
+              valueFrom:
+                secretKeyRef:
+                  name: kabu-secrets
+                  key: kis-account-number
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: kabu-secrets
+                  key: jwt-secret
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.monitoring:4317"
+            - name: OTEL_SERVICE_NAME
+              value: "kabu-backend"
+            - name: ENVIRONMENT
+              value: "production"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3

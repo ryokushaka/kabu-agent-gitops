@@ -1,0 +1,28 @@
+name: Update Manifest
+
+on:
+  repository_dispatch:
+    types: [update-image]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update image tag
+        run: |
+          cd manifests/kabu-agent/backend
+          sed -i "s|image: ghcr.io/.*/kabu-agent-backend:.*|image: ghcr.io/${{ github.repository_owner }}/kabu-agent-backend:${{ github.event.client_payload.image_tag }}|g" deployment.yaml
+
+      - name: Commit and Push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          git add .
+          git diff --staged --quiet || git commit -m "chore: update backend image to ${{ github.event.client_payload.image_tag }}"
+          git push
