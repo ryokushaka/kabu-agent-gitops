@@ -12,6 +12,17 @@
 alertmanager:
   enabled: false  # Using standalone Alertmanager
 
+# External Alertmanager configuration
+alertmanagerFiles:
+  alertmanager.yml: {}
+
+# Alerting configuration - connect to external Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+        - alertmanager.monitoring.svc.cluster.local:9093
+
 pushgateway:
   enabled: false
 
@@ -79,12 +90,6 @@ server:
   global:
     scrape_interval: 30s      # Reduced from default 15s
     evaluation_interval: 30s
-
-  # Alertmanager configuration
-  alertmanagers:
-    - static_configs:
-        - targets:
-            - alertmanager.monitoring.svc.cluster.local:9093
 
 # -----------------------------------------------------------------------------
 # ConfigMap Reload Sidecar
