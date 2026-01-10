@@ -20,8 +20,7 @@ data:
   alertmanager.yaml: |
     global:
       resolve_timeout: 5m
-      # Slack webhook URL - set via SealedSecret or environment
-      # slack_api_url: '${SLACK_WEBHOOK_URL}'
+      slack_api_url_file: '/etc/alertmanager/secrets/slack-webhook-url'
 
     route:
       group_by: ['alertname', 'namespace', 'severity']
@@ -50,15 +49,13 @@ data:
         slack_configs:
           - channel: '#kabu-alerts'
             send_resolved: true
-            title: '{{ template "slack.title" . }}'
-            text: '{{ template "slack.text" . }}'
-            actions:
-              - type: button
-                text: 'Runbook'
-                url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
-              - type: button
-                text: 'Dashboard'
-                url: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
+            title: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }}'
+            text: |
+              {{ range .Alerts }}
+              *Summary:* {{ .Annotations.summary }}
+              *Description:* {{ .Annotations.description }}
+              *Severity:* {{ .Labels.severity }}
+              {{ end }}
 
       # Critical alerts channel
       - name: 'slack-critical'
@@ -85,7 +82,6 @@ data:
               {{ range .Alerts }}
               *SLO:* {{ .Labels.slo }}
               *Summary:* {{ .Annotations.summary }}
-              *Description:* {{ .Annotations.description }}
               {{ end }}
 
     # Inhibition rules to suppress duplicate alerts
@@ -96,9 +92,6 @@ data:
         target_match:
           severity: 'warning'
         equal: ['alertname', 'namespace']
-
-    templates:
-      - '/etc/alertmanager/templates/*.tmpl'
 
 ---
 # -----------------------------------------------------------------------------
@@ -201,22 +194,11 @@ spec:
               mountPath: /etc/alertmanager
             - name: templates
               mountPath: /etc/alertmanager/templates
+            - name: secrets
+              mountPath: /etc/alertmanager/secrets
+              readOnly: true
             - name: storage
               mountPath: /alertmanager
-
-          env:
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: alertmanager-secrets
-                  key: slack-webhook-url
-                  optional: true
-            - name: DOMAIN_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: kabu-config
-                  key: domain-name
-                  optional: true
 
       volumes:
         - name: config
@@ -225,6 +207,9 @@ spec:
         - name: templates
           configMap:
             name: alertmanager-templates
+        - name: secrets
+          secret:
+            secretName: alertmanager-secrets
         - name: storage
           emptyDir: {}
 
