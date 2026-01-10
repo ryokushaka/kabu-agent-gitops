@@ -58,7 +58,7 @@ data:
                 url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
               - type: button
                 text: 'Dashboard'
-                url: 'https://grafana.${DOMAIN_NAME}/d/kabu-overview'
+                url: '{{ (index .Alerts 0).Annotations.dashboard_url }}'
 
       # Critical alerts channel
       - name: 'slack-critical'
@@ -175,7 +175,6 @@ spec:
             - --config.file=/etc/alertmanager/alertmanager.yaml
             - --storage.path=/alertmanager
             - --cluster.listen-address=
-            - --web.external-url=https://alertmanager.${DOMAIN_NAME}
             - --log.level=warn
 
           ports:
@@ -267,10 +266,9 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: alertmanager.${DOMAIN_NAME}
-      http:
+    - http:
         paths:
-          - path: /
+          - path: /alertmanager
             pathType: Prefix
             backend:
               service:
