@@ -8,16 +8,35 @@ spec:
 
   sourceRepos:
     - 'https://github.com/ryokushaka/kabu-agent-gitops.git'
+    # Helm chart repositories
+    - 'https://prometheus-community.github.io/helm-charts'
+    - 'https://grafana.github.io/helm-charts'
+    - 'https://istio-release.storage.googleapis.com/charts'
+    - 'https://kiali.org/helm-charts'
 
   destinations:
     - namespace: kabu-agent
       server: https://kubernetes.default.svc
     - namespace: monitoring
       server: https://kubernetes.default.svc
+    - namespace: istio-system
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
 
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace
+    - group: 'admissionregistration.k8s.io'
+      kind: MutatingWebhookConfiguration
+    - group: 'admissionregistration.k8s.io'
+      kind: ValidatingWebhookConfiguration
+    - group: 'apiextensions.k8s.io'
+      kind: CustomResourceDefinition
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRole
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRoleBinding
 
   namespaceResourceWhitelist:
     - group: '*'
