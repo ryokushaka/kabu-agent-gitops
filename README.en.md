@@ -54,7 +54,7 @@ Services:
 - **Prometheus**: `EIP:30090`
 - **Kiali**: `EIP:30201`
 
-### 3. Create Sealed Secrets (After K3s deployed)
+### 3. Create Sealed Secrets (After K3s Deployed)
 
 ```bash
 # On your K3s server (where sealed-secrets controller runs)
