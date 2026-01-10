@@ -154,9 +154,17 @@ ingress:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-  hosts:
-    - grafana.${DOMAIN_NAME}
+  # Use path-based routing without domain requirement
+  hosts: []
   # TLS will be handled by Traefik with Let's Encrypt
+
+# -----------------------------------------------------------------------------
+# Tracing Configuration (Disabled)
+# -----------------------------------------------------------------------------
+# Disable tracing to prevent startup errors
+env:
+  JAEGER_AGENT_HOST: ""
+  JAEGER_AGENT_PORT: ""
 
 # -----------------------------------------------------------------------------
 # Service Account
