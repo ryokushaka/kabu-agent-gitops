@@ -28,7 +28,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: backend
-          image: ghcr.io/ryokushaka/kabu-agent-backend:latest
+          image: ghcr.io/ryokushaka/kabu-agent-backend:3911f23c391a32699749e54e02b6e0833d61a00b
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
