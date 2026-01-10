@@ -15,15 +15,6 @@ alertmanager:
 pushgateway:
   enabled: false
 
-# External Alertmanager configuration (added to serverFiles)
-serverFiles:
-  prometheus.yml:
-    alerting:
-      alertmanagers:
-        - static_configs:
-          - targets:
-            - alertmanager.monitoring.svc.cluster.local:9093
-
 # -----------------------------------------------------------------------------
 # Node Exporter
 # -----------------------------------------------------------------------------
@@ -89,6 +80,11 @@ server:
     scrape_interval: 30s      # Reduced from default 15s
     evaluation_interval: 30s
 
+  # Service Configuration
+  service:
+    type: ClusterIP
+    servicePort: 80
+
 # -----------------------------------------------------------------------------
 # ConfigMap Reload Sidecar
 # -----------------------------------------------------------------------------
@@ -102,14 +98,6 @@ configmapReload:
       limits:
         cpu: 50m
         memory: 32Mi
-
-# -----------------------------------------------------------------------------
-# Service Configuration
-# -----------------------------------------------------------------------------
-server:
-  service:
-    type: ClusterIP
-    servicePort: 80
 
 # -----------------------------------------------------------------------------
 # Extra Scrape Configs
@@ -167,9 +155,17 @@ extraScrapeConfigs: |
         regex: redis-exporter
 
 # -----------------------------------------------------------------------------
-# Server Config Files (Alert Rules)
+# Server Config Files (Alert Rules + Alertmanager Config)
 # -----------------------------------------------------------------------------
 serverFiles:
+  # External Alertmanager configuration
+  prometheus.yml:
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+                - alertmanager.monitoring.svc.cluster.local:9093
+
   alerting_rules.yml:
     groups:
       - name: kabu-agent-alerts
